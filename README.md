@@ -4,6 +4,7 @@ Addons für Leitstellenspiel
 ## Infos
 Kleine Helferlein die im LSSM (noch) nicht enthalten sind werden hier aktiviert.
 * **Einsatz-Geschwindigkeit** wird immer beim Einsatz-Filter angezeigt, nicht nur, wenn Pause ist
+* **Personal-Anheuern** wenn der Spieler keinen Premium-Status hat, werden alle 2 Tage alle Wache auf 3 Tage Personal-Annheuern gestellt (läuft im Hintergrund, in der Browser-Console zu sehen)
 
 ## Features im Aufbau
 Folgende Feature werden aktuell noch aufgebaut:
