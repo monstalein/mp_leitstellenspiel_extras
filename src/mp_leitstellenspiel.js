@@ -2,12 +2,14 @@
 if("undefined"==typeof jQuery)throw new Error("mp_leitstellenspiel_extras: No jQuery! Aborting!");
 var mp_types=[0,2,6,9,11],mp_buildings=[],mp_employee=[],mp_emp_running=false;
 var mp_speed=["Realistisch", "Normal", "Schnell", "Turbo", "Langsam", "Extrem langsam", "Pause"];
+var mp_stopHiding = false;
+var mp_version=1.01;
 
 function mp_hire(i){
     if (i < mp_buildings.length){
         console.log("einstellen läuft " + Math.round(((i+1)/mp_buildings.length*100),2) + "% (" + (i+1) + "/" + mp_buildings.length + ")");
-        $.get("https://www.leitstellenspiel.de/buildings/" + mp_buildings[i] + "/hire_do/3");
-        $('#mp_employee > span > span').text("einstellen läuft (" + (i+1) + "/" + mp_buildings.length + ")").attr("title", Math.round(((i+1)/mp_buildings.length*100),1) + "%");
+        $.get(location.origin + "/buildings/" + mp_buildings[i] + "/hire_do/3");
+        $('#mp_employee > span > span').text("einstellen läuft " + Math.round(((i+1)/mp_buildings.length*100),2) + "% (" + (i+1) + "/" + mp_buildings.length + ")").attr("title", "" + Math.round(((i+1)/mp_buildings.length*100),2) + "% (" + (i+1) + "/" + mp_buildings.length + ")");
 //        $('#mp_employee .p1').css("width", (i/mp_buildings.length*99) + "%");
 //        $('#mp_employee .p0').css("width", (100-(i/mp_buildings.length*99)) + "%");
         var v=i+1;
@@ -22,7 +24,19 @@ function mp_hire(i){
             $('#mp_employee').hide('fade');
         }, 5000);
     }
-};
+}
+
+function mp_hire_start() {
+    
+    var d=new Date();
+    console.info("mp_leitstellenspiel_extras starting (" + s + ")");
+    console.group("mp_leitstellenspiel_extras running");
+    d.setDate(d.getDate()+2); // add two days to wait
+    localStorage.setItem("mp_hire_started",d.getTime());
+    mp_hire(0);
+    
+}
+
 
 function mp_show_speed() {
     if (typeof mission_speed !== "undefined") {
@@ -87,33 +101,54 @@ function mp_lookup_personal(indx) {
     }
 }
 
+
 $(function(){
     
-    console.info("mp_leitstellenspiel_extras loading...");
+    console.info("mp_leitstellenspiel_extras loading... (version " + mp_version + ")");
     
     $("#building_list > li").each((i,e)=>{ var t=jQuery(e).data("building_type_id");if (mp_types.indexOf(t)){mp_buildings.push(jQuery(e).children("ul").data("building_id"))}});
     
     window.setTimeout(()=>{
         if (typeof user_premium !== "undefined" && user_premium!=true){
             var d=new Date(),s=localStorage.getItem("mp_hire_started");
-            if (s==null||d.getTime()>s) {
-                console.info("mp_leitstellenspiel_extras starting (" + s + ")");
-                console.group("mp_leitstellenspiel_extras running");
-                d.setDate(d.getDate()+2); // add two days to wait
-                localStorage.setItem("mp_hire_started",d.getTime());
+            if (s==null||d.getTime()>(s*1)) {
                 
-                mp_hire(0);
+                mp_hire_start();
                 
             }else{
                 console.info("mp_leitstellenspiel_extras waiting a few days to start");
+                var h = (s-d.getTime())/86400000*24, m = (h - Math.floor(h))*60, sec = (m - Math.floor(m))*60;
+                $('#mp_employee > span > span').text('Anheuern läuft wieder in ' + Math.floor(h) + 'h ' + ("00"+Math.floor(m)).substr(-2) + "m oder klicken für jetzt anheuern").attr("title", "Das Anheuern wird auf 3 Tage gestellt (automisch bleibt bestehen)");
+                $('#mp_employee').css("cursor", "pointer");
+                $('#mp_employee').off().click(()=>{
+                    $('#mp_employee').off().css("cursor", "wait");
+                    $('#mp_employee > span > span').text('einstellen läuft ...');
+                    mp_stopHiding=true;
+                    mp_hire_start();
+                    return false;
+                });
+                window.setTimeout(()=>{
+                    if (!mp_stopHiding) {
+                        $('#mp_employee').hide('fade');
+                    }
+                }, 12000);
             }
         }else{
             console.info("mp_leitstellenspiel_extras premium detected - nothing to do");
-            $('#mp_employee > span > span').text('einstellen bei Premium nicht aktiv');
-            $('#mp_employee').css("cursor", "no-drop");
+            $('#mp_employee > span > span').text('Anheuern bei Premium nicht aktiv oder hier klicken für jetzt anheuern').attr("title", "Das Anheuern wird auf 3 Tage gestellt (\"automisch\" bleibt bestehen)");
+            $('#mp_employee').css("cursor", "pointer");
+            $('#mp_employee').off().click(()=>{
+                    $('#mp_employee').off().css("cursor", "wait");
+                    $('#mp_employee > span > span').text('einstellen läuft ...');
+                    mp_stopHiding=true;
+                    mp_hire_start();
+                    return false;
+                });
             window.setTimeout(()=>{
-                $('#mp_employee').hide('fade');
-            }, 8000);
+                if (!mp_stopHiding) {
+                        $('#mp_employee').hide('fade');
+                    }
+            }, 10000);
         }
     }, 2500);
 
@@ -122,7 +157,7 @@ $(function(){
         $('#navbar-main-collapse ul.nav.navbar-nav.navbar-right').append(`
             <li>
                 <a class="" id="mp_employee" style="cursor:progress;width:auto;min-width:126px;" onclick="return false;" id="mp_show_employee">
-                    <span class="label" style="background-color:#aaa;"><i class="glyphicon glyphicon-user"></i> <span>Angestellte</span></span>
+                    <span class="label" style="background-color:#aa0;"><i class="glyphicon glyphicon-user"></i> <span>Angestellte</span></span>
                     &nbsp;
                 </a>
             </li>`
