@@ -16,6 +16,6 @@ Wenn Fehler auftreten, oder Änderungswünsche bestehen, bitte gerne im Spiel me
 ## Rechtliches
 Dies sind freie Skripte zur Erweiterung des Browser-Spiels leitstellenspiel - es besteht keinerlei Anspruch auf Vollständigkeit oder Fehlerfreiheit oder Support - jegliche Haftung wird ausgeschlossen - **Einsatz auf eigene Gefahr**. 
 
-> WARNUNG: Der Rechte-Inhaber des Spiels untersagt ausdrücklich den Einsatz von automatisierten Skripten (hier das Anheuern) und droht mit sofortiger Kündigung!
+> WARNUNG: Der Rechte-Inhaber des Spiels untersagt ausdrücklich den Einsatz von automatisierten Skripten (hier das Anheuern) und droht mit sofortiger Kündigung des Spieler-Accounts!
 
 Die Skripte loggen beim Aufruf lediglich die Spieler-ID mit - sonst werden keinerlei Daten erhoben.
