@@ -11,7 +11,7 @@ Folgende Feature werden aktuell noch aufgebaut:
 * **Personal-Übersicht** man wird alles Personal in einer Liste sehen können - mit Ausbildung und Fahrzeug-Bindung
 
 ## Kontakt
-Wenn Fehler auftreten, oder Änderungswünsche bestehen, bitte gerne im Spiel melden: https://www.leitstellenspiel.de/profile/1275684
+Wenn Fehler auftreten, oder Änderungswünsche bestehen, bitte gerne einen Issue Request eröffnen
 
 ## Rechtliches
 Dies sind freie Skripte zur Erweiterung des Browser-Spiels leitstellenspiel - es besteht keinerlei Anspruch auf Vollständigkeit oder Fehlerfreiheit oder Support - jegliche Haftung wird ausgeschlossen - **Einsatz auf eigene Gefahr**. 
