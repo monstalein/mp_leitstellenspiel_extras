@@ -1,6 +1,6 @@
 "use strict";
 if("undefined"==typeof jQuery)throw new Error("mp_leitstellenspiel_extras: No jQuery! Aborting!");
-var mp_types=[0,2,6,9,11],mp_buildings=[],mp_employee=[],mp_emp_running=false;
+var mp_types=[0,2,5,6,9,11,12,13,15,17,18,19,20,21],mp_buildings=[],mp_employee=[],mp_emp_running=false;
 var mp_speed=["Realistisch", "Normal", "Schnell", "Turbo", "Langsam", "Extrem langsam", "Pause"];
 var mp_stopHiding = false;
 var mp_version=1.01;
