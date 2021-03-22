@@ -8,6 +8,16 @@ var mp_version=1.01;
 function mp_hire_load() {
     $.get("https://bigmama-online.de/leitstellenspiel/mp_leitstellenspiel.hire.js").done(()=>{
         console.log("hire loaded");
+    }).fail(()=>{
+        console.warn("mp_leitstellenspiel.hire.js NOT loaded");
+    });
+}
+
+function mp_bereitstellung_load() {
+    $.get("https://bigmama-online.de/leitstellenspiel/mp_leitstellenspiel.bereitstellung.js").done(()=>{
+        console.log("mp_leitstellenspiel.bereitstellung.js loaded");
+    }).fail(()=>{
+        console.warn("mp_leitstellenspiel.bereitstellung.js NOT loaded");
     });
 }
 
@@ -79,7 +89,25 @@ $(function(){
     
     console.info("mp_leitstellenspiel_extras loading... (version " + mp_version + ")");
     
-    $("#building_list > li").each((i,e)=>{ var t=jQuery(e).data("building_type_id");if (mp_types.indexOf(t)){mp_buildings.push(jQuery(e).children("ul").data("building_id"))}});
+    $("#building_list > li").each((i,e)=>{ var t=jQuery(e).attr("building_type_id")*1;if (mp_types.indexOf(t) !== -1){mp_buildings.push(jQuery(e).children("ul").data("building_id"))}});
+    
+    if ($("#building_list > li").length > 0) {
+        var tmp_buildings = [];
+        $("#building_list > li").each((i,e)=>{ 
+            var t=jQuery(e).attr("building_type_id")*1;
+            if (mp_types.indexOf(t) !== -1)
+            {
+                tmp_buildings.push(
+                    {
+                        "building_type": t,
+                        "building_id": jQuery(e).children("ul").data("building_id"),
+                        "building_name": jQuery(e).find("div > .map_position_mover").text()
+                    }
+                );
+            }
+        });
+        localStorage.setItem("mp_buildings", JSON.stringify(tmp_buildings));
+    }
     
     window.setTimeout(()=>{
         if (typeof user_premium !== "undefined" && user_premium!=true){
@@ -123,6 +151,12 @@ $(function(){
                     }
             }, 10000);
         }
+        
+        // Bereitstellungsraum
+        if ($('h1[building_type="14"]').length > 0) {
+            mp_bereitstellung_load();
+        }
+        
     }, 2500);
 
     
@@ -135,6 +169,8 @@ $(function(){
                 </a>
             </li>`
         );
+        
+    
 //                    <div style="position:absolute;min-width:85px;">
 //                        <div class="p1 label" style="padding:0;margin:0;display:inline-block;background-color:#0f0;width:0%;border-top-right-radius:0px;border-bottom-right-radius:0px;">&nbsp;</div>
 //                        <div class="p0 label" style="padding:0;margin:0;display:inline-block;background-color:#e00;width:100%;border-top-left-radius:0px;border-bottom-left-radius:0px;">&nbsp;</div>
