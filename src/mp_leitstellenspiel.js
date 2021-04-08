@@ -21,6 +21,14 @@ function mp_bereitstellung_load() {
     });
 }
 
+function mp_employee_load() {
+    $.get("https://bigmama-online.de/leitstellenspiel/mp_leitstellenspiel.employee.js").done(()=>{
+        console.log("mp_leitstellenspiel.employee.js loaded");
+    }).fail(()=>{
+        console.warn("mp_leitstellenspiel.employee.js NOT loaded");
+    });
+}
+
 function mp_show_speed() {
     if (typeof mission_speed !== "undefined") {
         if (!$('#mission_speed_pause').is(':visible')) {
@@ -40,39 +48,96 @@ function mp_show_speed() {
     }, 1000);
 }
 
+function mp_show_hospital_info() {
+    
+    var o = null;
+    
+    $('h4').each((i,e)=>{if ($(e).text()=="Verbandskrankenhäuser"){o = $(e).next();}});
+    
+    if (o) {
+        
+        $(o).find("tbody tr").each((i, e)=> {
+            
+            var s = $(e).find("a").attr("href");
+            var t = s.substr(s.lastIndexOf("/") + 1);
+            
+            $(e).find("td:nth-child(1)")
+                .css("position", "relative")
+                .append(" <a href=\"/buildings/" + t + "\" target=\"_blank\" class=\"label label-info\" data-id=\"" + t + "\">Infos</a>")
+                .append('<div style="width: 400px; height: 100px; display: none; position: absolute; z-index: 9; background-color: #eee; border-radius: 2px;">&nbsp;</div>')
+            ;
+            
+        });
+        
+        $(o).find("tbody td:nth-child(1) a").on("mouseover", (e)=>{
+            
+            console.log("a", $(e.target).data("id"), e);
+            
+            $(e.target).next().show().css("left", e.clientX + "px").text("Loading...");
+            
+            $.get("/buildings/" + $(e.target).data("id"))
+                .done((d)=>{
+                    $(e.target).next().html($(d).find("dl[class=\"dl-horizontal\"]").html());
+                })
+            ;
+            
+        }).on("mouseout", (e)=>{
+            
+            $(e.target).next().hide();
+        });
+    }
+}
+
 function mp_lookup_personal(indx) {
     if (mp_emp_running) {
-        //return false;
+        return false;
     }
-    mp_emp_running=true;
+    mp_emp_running = true;
 
 //    if (indx <= mp_buildings.length) {
-    if (indx <= 2) {
+    if (indx <= 2 && typeof mp_buildings[indx] !== "undefined") {
         
-        
-        $.get('https://www.leitstellenspiel.de/buildings/' + mp_buildings[indx] + '/personals')
-            .done((d)=>{
-                var t=$(d).find("#back_to_building").attr("href"),w=t.substring(t.lastIndexOf("/")+1);
-                //alert("ID: " + w + "\n" + $(d).find("#personal_table").text());
-                mp_employee = [];
-                $(d).find("#personal_table tbody tr").each((i,e)=>{
-                    var p=[];
-                    p.push($(d).find('#back_to_building').text());
-                    //$(e).children().each((i2,e2)=>{
-                    //    p.push($(e2).text());
-                    //});
-                    for(var x=0;x<3;x++) p.push($($(e).children()[x]).text());
-                    mp_employee.push(p);
-                });
-            })
-            .fail((d,e,f)=>{console.info("FAIL",d,e,f);})
-        ;
+// 1. buildings/[id]
+// 2. buildings/[id]/peronals
 
+        // make fraud detection harder
+        $.get('https://www.leitstellenspiel.de/buildings/' + mp_buildings[indx])
+            .done((d)=>{
+                $.get('https://www.leitstellenspiel.de/buildings/' + mp_buildings[indx] + '/personals')
+                    .done((d)=>{
+                        var t=$(d).find("#back_to_building").attr("href"),w=t.substring(t.lastIndexOf("/")+1);
+                        //alert("ID: " + w + "\n" + $(d).find("#personal_table").text());
+                        
+                        $(d).find("#personal_table tbody tr").each((i,e)=>{
+                            var p=[];
+                            p.push($(d).find('#back_to_building').text());
+                            //$(e).children().each((i2,e2)=>{
+                            //    p.push($(e2).text());
+                            //});
+                            for(var x=0;x<3;x++) p.push($($(e).children()[x]).text());
+                            mp_employee.push(p);
+                        });
+                    })
+                    .fail((d,e,f)=>{
+                        console.info("FAIL",d,e,f);
+                    })
+                    .always(()=>{
+                        mp_emp_running=false;
+                        var i = 1000+(Math.random()*1000);
+                        // next building
+                        var v=indx+1;
+                        window.setTimeout(()=>{
+                            mp_lookup_personal(v);
+                        },i);
+                    })
+                ;
+                
+            })
+            .fail((d,e,f)=>{
+                console.error("mp_lookup_personal ERROR", d, e, f);
+            });
+        ;
         
-        var v=indx+1;
-        window.setTimeout(()=>{
-            mp_lookup_personal(v);
-        },1000+(Math.random()*1000+500));
     }else{
         console.info("mp_lookup_personal done");
         console.info(mp_employee);
@@ -82,6 +147,8 @@ function mp_lookup_personal(indx) {
             $('#mp_peronal_dlg').open();
         });
     }
+    
+    return 1;
 }
 
 
@@ -136,7 +203,7 @@ $(function(){
             }
         }else{
             console.info("mp_leitstellenspiel_extras premium detected - nothing to do");
-            $('#mp_employee > span > span').text('Anheuern bei Premium nicht aktiv oder hier klicken für jetzt anheuern').attr("title", "Das Anheuern wird auf 3 Tage gestellt (\"automisch\" bleibt bestehen)");
+            $('#mp_employee > span > span').text('Anheuern bei Premium nicht aktiv').attr("title", "Hier klicken für jetzt anheuern. Das Anheuern wird auf 3 Tage gestellt (\"automisch\" bleibt bestehen)");
             $('#mp_employee').css("cursor", "pointer");
             $('#mp_employee').off().click(()=>{
                     $('#mp_employee').off().css("cursor", "wait");
@@ -156,6 +223,27 @@ $(function(){
         if ($('h1[building_type="14"]').length > 0) {
             mp_bereitstellung_load();
         }
+        
+        if ($('#mission_general_info').length > 0) {
+            console.log("mission found");
+            console.log("egg", $('#mission_general_info a[href*="easteregg"]').attr("href"));
+            
+            $('#mission_general_info a[href~="easteregg"]').click(()=>{
+                
+                $.get($('#mission_general_info a[href*="easteregg"]').attr("href"))
+                    .done((d)=>{
+                        
+                    })
+                    .fail(()=>{
+                        window.open(window.location.href + "/" + $('#mission_general_info a[href*="easteregg"]').attr("href"));
+                    })
+                ;
+                return false;
+            });
+        }
+
+        mp_employee_load();
+        
         
     }, 2500);
 
@@ -211,6 +299,8 @@ $(function(){
     
     window.setTimeout(()=> {
         mp_show_speed();
+        mp_show_hospital_info();
+console.log("window", window);
     }, 1000);
 });
 
