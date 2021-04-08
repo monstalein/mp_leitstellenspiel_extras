@@ -10,6 +10,7 @@ Kleine Helferlein die im LSSM (noch) nicht enthalten sind werden hier aktiviert.
 ## Features im Aufbau
 Folgende Feature werden aktuell noch aufgebaut:
 * **Personal-Übersicht** man wird alles Personal in einer Liste sehen können - mit Ausbildung und Fahrzeug-Bindung
+* **Krankenhaus-Info** im Fenster Sprechwunsch bearbeiten, sollen mehr Infos zum Krankenhaus angezeigt werden
 
 ## Kontakt
 Wenn Fehler auftreten, oder Änderungswünsche bestehen, bitte gerne einen Issue Request eröffnen
