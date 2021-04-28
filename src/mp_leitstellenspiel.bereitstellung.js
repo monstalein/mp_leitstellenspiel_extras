@@ -28,7 +28,7 @@
         
         $('#mp_loading_building').html("<label>Fahrzeuge von Wachen vor Ort: </label> " + s + 
             " <button class=\"btn btn-secondary\" type=\"button\" id=\"mp_sel_dept\" title=\"Es k&ouml;nnen nacheinander auch mehrere Wachen ausgew&auml;hlt werden, und dann einmal aufgehoben werden\">Wache ausw&auml;hlen</button> " +
-            " oder <button class=\"btn btn-primary\" type=\"button\" id=\"mp_sel_trailer\" title=\"Zugfahrzeuge fahren automatisch mit - so bleiben keine Anh&auml;nger im Status 9 hier\">Alle Anh&auml;nger ausw&auml;hlen</button>" + 
+            //" oder <button class=\"btn btn-primary\" type=\"button\" id=\"mp_sel_trailer\" title=\"Zugfahrzeuge fahren automatisch mit - so bleiben keine Anh&auml;nger im Status 9 hier\">Alle Anh&auml;nger ausw&auml;hlen</button>" + 
             " dann <button class=\"btn btn-warning\" type=\"submit\" name=\"submit\">Bereitstellung der Fahrzeuge aufheben</button>"
         );
         
@@ -47,7 +47,7 @@
             for (var i = 0; i < vehi.value.length; i++) {
                 
                 var t = vehi.value[i];
-                
+console.log("vehi", t);
                 if (typeof t.additional.trailer !== "undefined") {
                     // ist ein Anh&auml;nger
                     $('img[vehicle_type_id="' + t.id + '"]').parent().parent().find('input[class="vehicle_remove_checkbox"]').prop("checked", "checked");

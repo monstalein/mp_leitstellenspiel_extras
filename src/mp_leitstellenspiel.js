@@ -1,9 +1,117 @@
 "use strict";
 if("undefined"==typeof jQuery)throw new Error("mp_leitstellenspiel_extras: No jQuery! Aborting!");
-var mp_types=[0,2,5,6,9,11,12,13,15,17,18,19,20,21],mp_buildings=[],mp_employee=[],mp_emp_running=false;
+var mp_types=[0,2,5,6,9,11,12,13,15,17,18,19,20,21],mp_buildings=[],mp_employee={},mp_emp_running=false,mp_emp_indx=0;
 var mp_speed=["Realistisch", "Normal", "Schnell", "Turbo", "Langsam", "Extrem langsam", "Pause"];
 var mp_stopHiding = false;
 var mp_version=1.01;
+
+    function mp_lookup_personal(indx, forceLoad = false) {
+        if (mp_emp_running) {
+            return false;
+        }
+        
+        mp_emp_running = true;
+        mp_emp_indx = indx;
+        
+        if (indx < mp_buildings.length) {
+            $('#mp_personal_refresh span').text("(wird geladen " + (indx + 1) + "/" + mp_buildings.length + ")");
+        } else {
+            $('#mp_personal_refresh span').text("(fertig geladen " + (indx + 1) + "/" + mp_buildings.length + ")");
+        }
+
+        if (indx <= mp_buildings.length && typeof mp_buildings[indx] !== "undefined") {
+    //    if (indx <= 25 && typeof mp_buildings[indx] !== "undefined") {
+            
+    // 1. buildings/[id]
+    // 2. buildings/[id]/peronals
+            
+            var o = typeof mp_employee["b" + mp_buildings[indx]] !== "undefined" ? mp_employee["b" + mp_buildings[indx]] : null;
+            
+            if (o == null || ((new Date()).getTime() > (o.updatetime + 86400000)) || forceLoad ) { // wenn nicht geladen, oder aelter als 24h
+            
+    console.log("load employee", indx, o);
+    
+            // make fraud detection harder
+                $.get('https://www.leitstellenspiel.de/buildings/' + mp_buildings[indx])
+                    .done((dxx)=>{
+                        
+                        window.setTimeout(()=>{
+                            
+                            $.get('https://www.leitstellenspiel.de/buildings/' + mp_buildings[indx] + '/personals')
+                                .done((d)=>{
+                                    
+                                    var t=$(d).find("#back_to_building").attr("href"),w=t.substring(t.lastIndexOf("/")+1);
+                                    //alert("ID: " + w + "\n" + $(d).find("#personal_table").text());
+                                    
+                                    var s={
+                                            "buildingid": mp_buildings[indx], 
+                                            "buildingname": $(d).find('#back_to_building').text(), 
+                                            "updatetime": (new Date()).getTime(), 
+                                            "personal": []
+                                        };
+                                    
+                                    $(d).find("#personal_table tbody tr").each((i,e)=>{
+                                        
+                                        var p=[];
+                                        
+                                        //$(e).children().each((i2,e2)=>{
+                                        //    p.push($(e2).text());
+                                        //});
+                                        for(var x=0;x<3;x++) {
+                                            p.push($($(e).children()[x]).text());
+                                        }
+                                        
+                                        s.personal.push(p);
+                                    });
+                                    
+                                    mp_employee["b" + mp_buildings[indx]] = s;
+
+                                    localStorage.setItem("mp_employees", JSON.stringify(mp_employee));
+                                })
+                                .fail((d,e,f)=>{
+                                    console.info("FAIL",d,e,f);
+                                })
+                                .always(()=>{
+                                    mp_emp_running=false;
+                                    var i = 1000+(Math.random()*1000);
+                                    // next building
+                                    var v=indx+1;
+                                    window.setTimeout(()=>{
+                                        mp_lookup_personal(v, forceLoad);
+                                    },i);
+                                })
+                            ;
+                            
+                        }, 300 + (Math.random() * 100));
+                        
+                    })
+                    .fail((d,e,f)=>{
+                        console.error("mp_lookup_personal ERROR", d, e, f);
+                    });
+                ;
+                
+            } else { // Gebaeude ueberspringen
+    console.log("not loading employee", indx);
+                // next building
+                var v=indx+1;
+                mp_emp_running=false;
+                return mp_lookup_personal(v, forceLoad);
+                
+            }
+            
+        }else{
+            $('#mp_personal_refresh span').text("");
+            console.info("mp_lookup_personal done");
+            console.info(mp_employee);
+            mp_emp_running=false;
+            $('#mp_show_employee span').removeClass('label-default').addClass('label-success');
+            $('#mp_show_employee').on("click", ()=>{
+                $('#mp_peronal_dlg').open();
+            });
+        }
+        
+        return 1;
+    }
 
 function mp_hire_load() {
     $.get("https://bigmama-online.de/leitstellenspiel/mp_leitstellenspiel.hire.js").done(()=>{
@@ -24,8 +132,8 @@ function mp_bereitstellung_load() {
 function mp_employee_load() {
     $.get("https://bigmama-online.de/leitstellenspiel/mp_leitstellenspiel.employee.js").done(()=>{
         console.log("mp_leitstellenspiel.employee.js loaded");
-    }).fail(()=>{
-        console.warn("mp_leitstellenspiel.employee.js NOT loaded");
+    }).fail((d,e,f)=>{
+        console.warn("mp_leitstellenspiel.employee.js NOT loaded",d,e,f);
     });
 }
 
@@ -58,15 +166,18 @@ function mp_show_hospital_info() {
         
         $(o).find("tbody tr").each((i, e)=> {
             
-            var s = $(e).find("a").attr("href");
-            var t = s.substr(s.lastIndexOf("/") + 1);
+            var s = $(e).find("td:nth-child(6) a").attr("href");
             
-            $(e).find("td:nth-child(1)")
-                .css("position", "relative")
-                .append(" <a href=\"/buildings/" + t + "\" target=\"_blank\" class=\"label label-info\" data-id=\"" + t + "\">Infos</a>")
-                .append('<div style="width: 400px; height: 100px; display: none; position: absolute; z-index: 9; background-color: #eee; border-radius: 2px;">&nbsp;</div>')
-            ;
-            
+            // only if there is a 6th column
+            if (s) {
+                var t = s.substr(s.lastIndexOf("/") + 1);
+                
+                $(e).find("td:nth-child(1)")
+                    .css("position", "relative")
+                    .append(" <a href=\"/buildings/" + t + "\" target=\"_blank\" class=\"label label-info\" data-id=\"" + t + "\">Infos</a>")
+                    .append('<div style="width: 400px; height: 100px; display: none; position: absolute; z-index: 9; background-color: #eee; border-radius: 2px;">&nbsp;</div>')
+                ;
+            }
         });
         
         $(o).find("tbody td:nth-child(1) a").on("mouseover", (e)=>{
@@ -88,68 +199,6 @@ function mp_show_hospital_info() {
     }
 }
 
-function mp_lookup_personal(indx) {
-    if (mp_emp_running) {
-        return false;
-    }
-    mp_emp_running = true;
-
-//    if (indx <= mp_buildings.length) {
-    if (indx <= 2 && typeof mp_buildings[indx] !== "undefined") {
-        
-// 1. buildings/[id]
-// 2. buildings/[id]/peronals
-
-        // make fraud detection harder
-        $.get('https://www.leitstellenspiel.de/buildings/' + mp_buildings[indx])
-            .done((d)=>{
-                $.get('https://www.leitstellenspiel.de/buildings/' + mp_buildings[indx] + '/personals')
-                    .done((d)=>{
-                        var t=$(d).find("#back_to_building").attr("href"),w=t.substring(t.lastIndexOf("/")+1);
-                        //alert("ID: " + w + "\n" + $(d).find("#personal_table").text());
-                        
-                        $(d).find("#personal_table tbody tr").each((i,e)=>{
-                            var p=[];
-                            p.push($(d).find('#back_to_building').text());
-                            //$(e).children().each((i2,e2)=>{
-                            //    p.push($(e2).text());
-                            //});
-                            for(var x=0;x<3;x++) p.push($($(e).children()[x]).text());
-                            mp_employee.push(p);
-                        });
-                    })
-                    .fail((d,e,f)=>{
-                        console.info("FAIL",d,e,f);
-                    })
-                    .always(()=>{
-                        mp_emp_running=false;
-                        var i = 1000+(Math.random()*1000);
-                        // next building
-                        var v=indx+1;
-                        window.setTimeout(()=>{
-                            mp_lookup_personal(v);
-                        },i);
-                    })
-                ;
-                
-            })
-            .fail((d,e,f)=>{
-                console.error("mp_lookup_personal ERROR", d, e, f);
-            });
-        ;
-        
-    }else{
-        console.info("mp_lookup_personal done");
-        console.info(mp_employee);
-        mp_emp_running=false;
-        $('#mp_show_employee span').removeClass('label-default').addClass('label-success');
-        $('#mp_show_employee').on("click", ()=>{
-            $('#mp_peronal_dlg').open();
-        });
-    }
-    
-    return 1;
-}
 
 
 $(function(){
@@ -242,8 +291,8 @@ $(function(){
             });
         }
 
-        mp_employee_load();
         
+        mp_employee_load();
         
     }, 2500);
 
@@ -300,7 +349,7 @@ $(function(){
     window.setTimeout(()=> {
         mp_show_speed();
         mp_show_hospital_info();
-console.log("window", window);
+
     }, 1000);
 });
 
