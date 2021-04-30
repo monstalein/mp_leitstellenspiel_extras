@@ -11,7 +11,7 @@ Kleine Helferlein die im LSSM (noch) nicht enthalten sind werden hier aktiviert.
 
 ## Features im Aufbau
 Folgende Feature werden aktuell noch aufgebaut:
--
+* **Einsatz-Filter** die Einsatzliste soll nach Credits gefiltert werden können
 
 ## Kontakt
 Wenn Fehler auftreten, oder Änderungswünsche bestehen, bitte gerne einen Issue Request eröffnen
