@@ -8,10 +8,14 @@ Kleine Helferlein die im LSSM (noch) nicht enthalten sind werden hier aktiviert.
 * **Personal-Anheuern** wenn der Spieler keinen Premium-Status hat, werden alle 2 Tage alle Wache auf 3 Tage Personal-Annheuern gestellt (läuft im Hintergrund, in der [Browser-Console (unten auf der Seite steht, wie man sie öffnen kann)](https://www.w3schools.com/js/js_debugging.asp) zu sehen)
 * **Krankenhaus-Info** im Fenster Sprechwunsch bearbeiten, werden mehr Infos zum Krankenhaus per Moveover angezeigt (Inhaber und Stufe) - beim Klick auf Info öffnet sich das Krankenhaus im neuen Tab/Fenster
 * **Personal-Übersicht** alles Personal kann in einer Liste sehen (unter Menü Profil->Angestellte) - mit Ausbildung und Fahrzeug-Bindung
+* **Einsatz-Filter** die Einsatzliste kann nach Credits gefiltert werden
+
+## Installation
+Zum einfachen Betrieb des Script empfiehlt sich der Einsatz von TamperMonkey. Dort einfach ein neues Skript hinzufügen und den Inhalt von **mp_loader.js** reinsetzen.
+
 
 ## Features im Aufbau
 Folgende Feature werden aktuell noch aufgebaut:
-* **Einsatz-Filter** die Einsatzliste soll nach Credits gefiltert werden können
 
 ## Kontakt
 Wenn Fehler auftreten, oder Änderungswünsche bestehen, bitte gerne einen Issue Request eröffnen
