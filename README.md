@@ -3,6 +3,10 @@ Addons für Leitstellenspiel
 
 ## Infos
 Kleine Helferlein die im LSSM (noch) nicht enthalten sind werden hier aktiviert.
+
+## Verfügbare Features
+Die Features sind schon verfügbar:
+
 * **Einsatz-Geschwindigkeit** wird immer beim Einsatz-Filter angezeigt, nicht nur, wenn Pause ist
 * **Bereitstellungsraum** bessere Auswahl: alle Fahrzeuge von einzelnen Wachen auswählen, um sie nach Hause zu schicken (Anhänger auch extra, damit sie nicht im Status 9 hängen bleiben)
 * **Personal-Anheuern** wenn der Spieler keinen Premium-Status hat, werden alle 2 Tage alle Wache auf 3 Tage Personal-Annheuern gestellt (läuft im Hintergrund, in der [Browser-Console (unten auf der Seite steht, wie man sie öffnen kann)](https://www.w3schools.com/js/js_debugging.asp) zu sehen)
@@ -17,6 +21,9 @@ Zum einfachen Betrieb des Script empfiehlt sich der Einsatz von [TamperMonkey](h
 
 ## Features im Aufbau
 Folgende Feature werden aktuell noch aufgebaut:
+*
+
+## Feature Ideen
 * **Globaler Cache** Personal-Daten und andere gespeicherte Daten in die Cloud speichern, damit die nicht in jedem Browser erneut geladen werden müssen ??? **Datenschutz prüfen**
 
 ## Kontakt
