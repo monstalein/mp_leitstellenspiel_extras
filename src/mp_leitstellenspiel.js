@@ -2,8 +2,9 @@
 if("undefined"==typeof jQuery)throw new Error("mp_leitstellenspiel_extras: No jQuery! Aborting!");
 var mp_types=[0,2,5,6,9,11,12,13,15,17,18,19,20,21],mp_buildings=[],mp_employee={},mp_emp_running=false,mp_emp_indx=0;
 var mp_speed=["Realistisch", "Normal", "Schnell", "Turbo", "Langsam", "Extrem langsam", "Pause"];
+let mp_intervall = [{n:0, x:500},{n:500,x:1000},{n:1000,x:3000},{n:3000,x:6000},{n:6000,x:999999}], mp_mission_filter_selected = -1;
 var mp_stopHiding = false;
-var mp_version=1.01;
+var mp_version=1.02;
 
     function mp_lookup_personal(indx, forceLoad = false) {
         if (mp_emp_running) {
@@ -112,6 +113,81 @@ var mp_version=1.01;
         
         return 1;
     }
+
+function mp_filter_missions() {
+  
+    let mp_missions = [];
+    
+    $('#search_input_field_missions').after('<label for="mp_mission_filter">Mission filter:</label> <select id="mp_mission_filter"></select>');
+    
+    var o = "<option value=\"-1\">Alle</option>";
+
+    var m = JSON.parse(localStorage.getItem("aMissions"));
+    
+    for (var i = 0; i < mp_intervall.length; i++) {
+        
+        o += `<option value="${i}">Ab ${mp_intervall[i].n} Credits</option>`;
+
+        let x = mp_intervall[i];
+
+        mp_missions[i] = m.value.filter(function (m) {return m.average_credits >= this.val.n && m.average_credits < this.val.x; }, {val: x});
+
+    }
+    
+    console.log("missions", mp_missions);
+    
+    $('#mp_mission_filter').append(o);
+        
+    $('#mp_mission_filter').val(mp_mission_filter_selected);
+    
+    $('#mp_mission_filter').on("change", ()=> {
+        
+        mp_mission_filter_selected = $('#mp_mission_filter option:selected').val();
+    });
+    
+    var missions = [];
+    
+    mp_missions.map(function(m,i){ 
+    
+        m.map(function(e) {
+            
+            this.m[e.id] = this.i;
+            
+        }, { m: this.m, i: i});
+
+    }, { m: missions });
+    
+    console.log("miss", missions);
+    
+    var filter = () => {
+        
+        var h = 0, s = 0;
+      
+        $('#missions-panel-body .missionSideBarEntry').each((i,e)=> {
+
+            var id = $(e).attr("mission_type_id");
+            
+            if (missions[id] < mp_mission_filter_selected) {
+                
+                $(e).hide();
+                h++;
+                
+            } else {
+            
+                $(e).show();
+                s++;
+            }
+
+        });
+        console.log("hidden:", h, " / shown", s);
+    };
+    
+    window.setInterval(function () {
+        
+        filter();
+        
+    }, 1000);
+}
 
 function mp_hire_load() {
     $.get("https://bigmama-online.de/leitstellenspiel/mp_leitstellenspiel.hire.js").done(()=>{
@@ -291,8 +367,10 @@ $(function(){
             });
         }
 
-        
+        // load module
         mp_employee_load();
+        
+        mp_filter_missions();
         
     }, 2500);
 
