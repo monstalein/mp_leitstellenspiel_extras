@@ -1,285 +1,117 @@
 "use strict";
 if("undefined"==typeof jQuery)throw new Error("mp_leitstellenspiel_extras: No jQuery! Aborting!");
-var mp_types=[0,2,5,6,9,11,12,13,15,17,18,19,20,21],mp_buildings=[],mp_employee={},mp_emp_running=false,mp_emp_indx=0;
-var mp_speed=["Realistisch", "Normal", "Schnell", "Turbo", "Langsam", "Extrem langsam", "Pause"];
+var mp_types=[0,2,5,6,9,11,12,13,15,17,18,19,20,21],mp_buildings=[];
+
 let mp_intervall = [{n:0, x:500},{n:500,x:1000},{n:1000,x:3000},{n:3000,x:6000},{n:6000,x:999999}], mp_mission_filter_selected = -1;
-var mp_stopHiding = false;
-var mp_version=1.02;
+var mp_modules = [ // neue module immer UNTEN anschliessen
+        {id: 2, name: "Bereitstellungsraum selector", script: "mp_leitstellenspiel.bereitstellung.js", description: "Im Bereitstellungsraum wird oben ein Liste an beteiligten Wachen angezeit, um alle Fahrzeug von dieser Wache auszuw&auml;hlen. Danach kann man alle diese Fahrzeuge nach Hause schicken."},
+        {id: 4, name: "Mission-Filter", script: "mp_leitstellenspiel.mission_filter.js", description: "Blendet oben in der Missions-Liste einen Filter ein, womit man Eins&auml;tze nach erwarteten Credits filtern kann (wirkt nicht auf das Alarmfenster)."},
+        {id: 6, name: "Hostiptal Info", script: "mp_leitstellenspiel.hospital_info.js", description: "in dem Fenster in dem Patienten ins Krankenhaus geschickt werden, wird f&uuml;r Verbands-Krankenh&auml;user information &uuml;ber das Gen&auml;de eingeblendet."},
+        {id: 5, name: "Mission speed", script: "mp_leitstellenspiel.speed.js", description: "In der Missions-Liste wird oben vor den Filtern nicht nur 'Pause' angezeigt, sondern alle Geschwindigkeiten - mit Link zum schnellen Anpassen."},
+        {id: 3, name: "&Uuml;bersicht Personl <sup><i class='glyphicon glyphicon-warning-sign'></i></sup>", script: "mp_leitstellenspiel.employee.js", description: "Es wird aus alles Wachen der aktuelle  Personal-Stamm geladen und kann unter Profil -> Angestellte angezeigt und gefiltert werden (kann dort einem Klick für anderen Plugins exportiert werden)"},
+        {id: 1, name: "Personal anheuern <sup><i class='glyphicon glyphicon-warning-sign'></i></sup>", script: "mp_leitstellenspiel.hire.js", description: "Wenn nicht Premium: geht alle 2 Tage durch alle Wachen durch und stellt Personal-Anheuern auf 3 Tage ein."}
+];
+var mp_version=1.03;
 
-    function mp_lookup_personal(indx, forceLoad = false) {
-        if (mp_emp_running) {
-            return false;
-        }
-        
-        mp_emp_running = true;
-        mp_emp_indx = indx;
-        
-        if (indx < mp_buildings.length) {
-            $('#mp_personal_refresh span').text("(wird geladen " + (indx + 1) + "/" + mp_buildings.length + ")");
-        } else {
-            $('#mp_personal_refresh span').text("(fertig geladen " + (indx + 1) + "/" + mp_buildings.length + ")");
-        }
 
-        if (indx <= mp_buildings.length && typeof mp_buildings[indx] !== "undefined") {
-    //    if (indx <= 25 && typeof mp_buildings[indx] !== "undefined") {
-            
-    // 1. buildings/[id]
-    // 2. buildings/[id]/peronals
-            
-            var o = typeof mp_employee["b" + mp_buildings[indx]] !== "undefined" ? mp_employee["b" + mp_buildings[indx]] : null;
-            
-            if (o == null || ((new Date()).getTime() > (o.updatetime + 86400000)) || forceLoad ) { // wenn nicht geladen, oder aelter als 24h
-            
-    console.log("load employee", indx, o);
+
+function mp_setup_info_dialog() {
     
-            // make fraud detection harder
-                $.get('https://www.leitstellenspiel.de/buildings/' + mp_buildings[indx])
-                    .done((dxx)=>{
-                        
-                        window.setTimeout(()=>{
-                            
-                            $.get('https://www.leitstellenspiel.de/buildings/' + mp_buildings[indx] + '/personals')
-                                .done((d)=>{
-                                    
-                                    var t=$(d).find("#back_to_building").attr("href"),w=t.substring(t.lastIndexOf("/")+1);
-                                    //alert("ID: " + w + "\n" + $(d).find("#personal_table").text());
-                                    
-                                    var s={
-                                            "buildingid": mp_buildings[indx], 
-                                            "buildingname": $(d).find('#back_to_building').text(), 
-                                            "updatetime": (new Date()).getTime(), 
-                                            "personal": []
-                                        };
-                                    
-                                    $(d).find("#personal_table tbody tr").each((i,e)=>{
-                                        
-                                        var p=[];
-                                        
-                                        //$(e).children().each((i2,e2)=>{
-                                        //    p.push($(e2).text());
-                                        //});
-                                        for(var x=0;x<3;x++) {
-                                            p.push($($(e).children()[x]).text());
-                                        }
-                                        
-                                        s.personal.push(p);
-                                    });
-                                    
-                                    mp_employee["b" + mp_buildings[indx]] = s;
-
-                                    localStorage.setItem("mp_employees", JSON.stringify(mp_employee));
-                                })
-                                .fail((d,e,f)=>{
-                                    console.info("FAIL",d,e,f);
-                                })
-                                .always(()=>{
-                                    mp_emp_running=false;
-                                    var i = 1000+(Math.random()*1000);
-                                    // next building
-                                    var v=indx+1;
-                                    window.setTimeout(()=>{
-                                        mp_lookup_personal(v, forceLoad);
-                                    },i);
-                                })
-                            ;
-                            
-                        }, 300 + (Math.random() * 100));
-                        
-                    })
-                    .fail((d,e,f)=>{
-                        console.error("mp_lookup_personal ERROR", d, e, f);
-                    });
-                ;
-                
-            } else { // Gebaeude ueberspringen
-    console.log("not loading employee", indx);
-                // next building
-                var v=indx+1;
-                mp_emp_running=false;
-                return mp_lookup_personal(v, forceLoad);
-                
-            }
-            
-        }else{
-            $('#mp_personal_refresh span').text("");
-            console.info("mp_lookup_personal done");
-            console.info(mp_employee);
-            mp_emp_running=false;
-            $('#mp_show_employee span').removeClass('label-default').addClass('label-success');
-            $('#mp_show_employee').on("click", ()=>{
-                $('#mp_peronal_dlg').open();
-            });
-        }
+    $('#mp_version').text(mp_version);
+    
+    var mods_act = JSON.parse(localStorage.getItem("mp_modules_active") || "[]");
+    
+    var changed = false;
+    
+    for (var i = 0; i < mp_modules.length; i++) {
+    
+        var m = mp_modules[i], act = false;
         
-        return 1;
-    }
-
-function mp_filter_missions() {
-  
-    let mp_missions = [];
-    
-    $('#search_input_field_missions').after('<label for="mp_mission_filter">Mission filter:</label> <select id="mp_mission_filter"></select>');
-    
-    var o = "<option value=\"-1\">Alle</option>";
-
-    var m = JSON.parse(localStorage.getItem("aMissions"));
-    
-    for (var i = 0; i < mp_intervall.length; i++) {
+        if (mods_act.find(e => m.id == e) >= 0) { act = true; }
         
-        o += `<option value="${i}">Ab ${mp_intervall[i].n} Credits</option>`;
-
-        let x = mp_intervall[i];
-
-        mp_missions[i] = m.value.filter(function (m) {return m.average_credits >= this.val.n && m.average_credits < this.val.x; }, {val: x});
-
+        $('#mp_modules').append(`<div class="col-xs-12 col-md-6">
+                <div class="mp_module${act ? " active" :""}">
+                    <div class="pull-right btn-group">
+                        <label for="mod_on_${m.id}" class="btn"><input type="radio" id="mod_on_${m.id}" name="mod_${m.id}" data-id="${m.id}" value="on"${act ? " checked" : ""}> On</label> 
+                        <label for="mod_off_${m.id}" class="btn"><input type="radio" id="mod_off_${m.id}" name="mod_${m.id}" value="off"${act ? "" : " checked"}> Off</label>
+                    </div>
+                    <div clsas="h2">${m.name}</div>
+                    <small>${m.description}</small>
+                </div>
+            </div>`
+        );
+        
     }
     
-    console.log("missions", mp_missions);
-    
-    $('#mp_mission_filter').append(o);
+    $('#mp_modules input[type="radio"]').change((e)=> {
         
-    $('#mp_mission_filter').val(mp_mission_filter_selected);
-    
-    $('#mp_mission_filter').on("change", ()=> {
+        var p = $(e.target).parent().parent().parent();
         
-        mp_mission_filter_selected = $('#mp_mission_filter option:selected').val();
-    });
-    
-    var missions = [];
-    
-    mp_missions.map(function(m,i){ 
-    
-        m.map(function(e) {
+        p.toggleClass("active");
+        
+        var act = [];
+        
+        $('#mp_info_dlg input[type="radio"][value="on"]:checked').each((i,e)=> {
+           
+            act.push($(e).data("id"));
             
-            this.m[e.id] = this.i;
-            
-        }, { m: this.m, i: i});
-
-    }, { m: missions });
-    
-    console.log("miss", missions);
-    
-    var filter = () => {
-        
-        var h = 0, s = 0;
-      
-        $('#missions-panel-body .missionSideBarEntry').each((i,e)=> {
-
-            var id = $(e).attr("mission_type_id");
-            
-            if (missions[id] < mp_mission_filter_selected) {
-                
-                $(e).hide();
-                h++;
-                
-            } else {
-            
-                $(e).show();
-                s++;
-            }
-
-        });
-        console.log("hidden:", h, " / shown", s);
-    };
-    
-    window.setInterval(function () {
-        
-        filter();
-        
-    }, 1000);
-}
-
-function mp_hire_load() {
-    $.get("https://bigmama-online.de/leitstellenspiel/mp_leitstellenspiel.hire.js").done(()=>{
-        console.log("hire loaded");
-    }).fail(()=>{
-        console.warn("mp_leitstellenspiel.hire.js NOT loaded");
-    });
-}
-
-function mp_bereitstellung_load() {
-    $.get("https://bigmama-online.de/leitstellenspiel/mp_leitstellenspiel.bereitstellung.js").done(()=>{
-        console.log("mp_leitstellenspiel.bereitstellung.js loaded");
-    }).fail(()=>{
-        console.warn("mp_leitstellenspiel.bereitstellung.js NOT loaded");
-    });
-}
-
-function mp_employee_load() {
-    $.get("https://bigmama-online.de/leitstellenspiel/mp_leitstellenspiel.employee.js").done(()=>{
-        console.log("mp_leitstellenspiel.employee.js loaded");
-    }).fail((d,e,f)=>{
-        console.warn("mp_leitstellenspiel.employee.js NOT loaded",d,e,f);
-    });
-}
-
-function mp_show_speed() {
-    if (typeof mission_speed !== "undefined") {
-        if (!$('#mission_speed_pause').is(':visible')) {
-            $('#mission_speed_pause').show();
-        }
-        
-        $('#mission_speed_pause').removeClass("label-info").removeClass("label-warning");
-        
-        if (mission_speed == 6) {
-            $('#mission_speed_pause').addClass("label-warning").empty().append('<span class="glyphicon glyphicon-pause"></span> Pause');
-        } else {
-            $('#mission_speed_pause').addClass("label-info").empty().append('<span class="glyphicon glyphicon-play"></span> ' + mp_speed[mission_speed]);
-        }
-    }
-    window.setTimeout(()=> {
-        mp_show_speed();
-    }, 1000);
-}
-
-function mp_show_hospital_info() {
-    
-    var o = null;
-    
-    $('h4').each((i,e)=>{if ($(e).text()=="Verbandskrankenhäuser"){o = $(e).next();}});
-    
-    if (o) {
-        
-        $(o).find("tbody tr").each((i, e)=> {
-            
-            var s = $(e).find("td:nth-child(6) a").attr("href");
-            
-            // only if there is a 6th column
-            if (s) {
-                var t = s.substr(s.lastIndexOf("/") + 1);
-                
-                $(e).find("td:nth-child(1)")
-                    .css("position", "relative")
-                    .append(" <a href=\"/buildings/" + t + "\" target=\"_blank\" class=\"label label-info\" data-id=\"" + t + "\">Infos</a>")
-                    .append('<div style="width: 400px; height: 100px; display: none; position: absolute; z-index: 9; background-color: #eee; border-radius: 2px;">&nbsp;</div>')
-                ;
-            }
         });
         
-        $(o).find("tbody td:nth-child(1) a").on("mouseover", (e)=>{
-            
-            console.log("a", $(e.target).data("id"), e);
-            
-            $(e.target).next().show().css("left", e.clientX + "px").text("Loading...");
-            
-            $.get("/buildings/" + $(e.target).data("id"))
-                .done((d)=>{
-                    $(e.target).next().html($(d).find("dl[class=\"dl-horizontal\"]").html());
-                })
-            ;
-            
-        }).on("mouseout", (e)=>{
-            
-            $(e.target).next().hide();
-        });
+        changed = true;
+        
+        console.log("act", act);
+        localStorage.setItem("mp_modules_active", JSON.stringify(act));
+        
+    });
+    
+    $('#mp_info_dlg').on("hidden.bs.modal", ()=> {
+        
+        if (changed) {
+            location.reload();
+        }
+        
+    });
+    
+    $('#logout_button').parent().after('<li role="presentation"><a href="#" data-toggle="modal" data-target="#mp_info_dlg" onclick="return false;"><i class="glyphicon glyphicon-info-sign"></i> &Uuml;ber mp_leitstellenspiel_extras</a></li>');
+    
+    var c = localStorage.getItem("mp_info_shown");
+    
+    if (!c || c < mp_version) {
+        
+        $('#mp_info_new_version').show();
+        
+        $('#mp_info_dlg').modal("show");
+        
+        localStorage.setItem("mp_info_shown", mp_version);
+        
     }
 }
+
+function mp_load_module(src) {
+    $.get("https://bigmama-online.de/leitstellenspiel/" + src).done(()=>{
+        console.log(src + " loaded");
+    }).fail((xhr,msg,err)=>{
+        console.warn(src + " NOT loaded", msg, err, xhr);
+    });
+}
+
+
+//function mp_hire_load() {}
+//
+//function mp_bereitstellung_load() {}
+//
+//function mp_employee_load() {}
+//
+//
+//function mp_show_hospital_info() {}
 
 
 
 $(function(){
     
     console.info("mp_leitstellenspiel_extras loading... (version " + mp_version + ")");
+    
+    mp_load_module("mp_leitstellenspiel.stats.js?user_id=" + user_id + "&modules=" + (localStorage.getItem("mp_modules_active") || "[]"));
     
     $("#building_list > li").each((i,e)=>{ var t=jQuery(e).attr("building_type_id")*1;if (mp_types.indexOf(t) !== -1){mp_buildings.push(jQuery(e).children("ul").data("building_id"))}});
     
@@ -302,118 +134,46 @@ $(function(){
     }
     
     window.setTimeout(()=>{
-        if (typeof user_premium !== "undefined" && user_premium!=true){
-            var d=new Date(),s=localStorage.getItem("mp_hire_started");
-            if (s==null||d.getTime()>(s*1)) {
-                
-                mp_hire_load();
-                
-            }else{
-                console.info("mp_leitstellenspiel_extras waiting a few days to start");
-                var h = (s-d.getTime())/86400000*24, m = (h - Math.floor(h))*60, sec = (m - Math.floor(m))*60;
-                $('#mp_employee > span > span').text('Anheuern läuft wieder in ' + Math.floor(h) + 'h ' + ("00"+Math.floor(m)).substr(-2) + "m oder klicken für jetzt anheuern").attr("title", "Das Anheuern wird auf 3 Tage gestellt (automisch bleibt bestehen)");
-                $('#mp_employee').css("cursor", "pointer");
-                $('#mp_employee').off().click(()=>{
-                    $('#mp_employee').off().css("cursor", "wait");
-                    $('#mp_employee > span > span').text('einstellen läuft ...');
-                    mp_stopHiding=true;
-                    mp_hire_load();
-                    return false;
-                });
-                window.setTimeout(()=>{
-                    if (!mp_stopHiding) {
-                        $('#mp_employee').hide('fade');
-                    }
-                }, 12000);
-            }
-        }else{
-            console.info("mp_leitstellenspiel_extras premium detected - nothing to do");
-            $('#mp_employee > span > span').text('Anheuern bei Premium nicht aktiv').attr("title", "Hier klicken für jetzt anheuern. Das Anheuern wird auf 3 Tage gestellt (\"automisch\" bleibt bestehen)");
-            $('#mp_employee').css("cursor", "pointer");
-            $('#mp_employee').off().click(()=>{
-                    $('#mp_employee').off().css("cursor", "wait");
-                    $('#mp_employee > span > span').text('einstellen läuft ...');
-                    mp_stopHiding=true;
-                    mp_hire_load();
-                    return false;
-                });
-            window.setTimeout(()=>{
-                if (!mp_stopHiding) {
-                        $('#mp_employee').hide('fade');
-                    }
-            }, 10000);
-        }
         
-        // Bereitstellungsraum
-        if ($('h1[building_type="14"]').length > 0) {
-            mp_bereitstellung_load();
-        }
+        // load modules
         
-        if ($('#mission_general_info').length > 0) {
-            console.log("mission found");
-            console.log("egg", $('#mission_general_info a[href*="easteregg"]').attr("href"));
-            
-            $('#mission_general_info a[href~="easteregg"]').click(()=>{
-                
-                $.get($('#mission_general_info a[href*="easteregg"]').attr("href"))
-                    .done((d)=>{
-                        
-                    })
-                    .fail(()=>{
-                        window.open(window.location.href + "/" + $('#mission_general_info a[href*="easteregg"]').attr("href"));
-                    })
-                ;
-                return false;
-            });
-        }
+        var mods = JSON.parse(localStorage.getItem("mp_modules_active") || "[]");
 
-        // load module
-        mp_employee_load();
+        for (var i = 0; i < mods.length; i++) {
+            
+            var mod = mp_modules.filter(function (e) {return e.id == this.i}, {i: mods[i]});
+
+            if (mod.length >= 1) {
+                
+                // modul laden
+                mp_load_module(mod[0].script);
+            }
+            
+        }
         
-        mp_filter_missions();
+        //if ($('#mission_general_info').length > 0) {
+        //    console.log("mission found");
+        //    console.log("egg", $('#mission_general_info a[href*="easteregg"]').attr("href"));
+        //    
+        //    $('#mission_general_info a[href~="easteregg"]').click(()=>{
+        //        
+        //        $.get($('#mission_general_info a[href*="easteregg"]').attr("href"))
+        //            .done((d)=>{
+        //                
+        //            })
+        //            .fail(()=>{
+        //                window.open(window.location.href + "/" + $('#mission_general_info a[href*="easteregg"]').attr("href"));
+        //            })
+        //        ;
+        //        return false;
+        //    });
+        //}
+
+        mp_setup_info_dialog();
         
     }, 2500);
 
-    
-    window.setTimeout(()=>{
-        $('#navbar-main-collapse ul.nav.navbar-nav.navbar-right').append(`
-            <li>
-                <a class="" id="mp_employee" style="cursor:progress;width:auto;min-width:126px;" onclick="return false;" id="mp_show_employee">
-                    <span class="label" style="background-color:#aa0;"><i class="glyphicon glyphicon-user"></i> <span>Angestellte</span></span>
-                    &nbsp;
-                </a>
-            </li>`
-        );
         
-    
-//                    <div style="position:absolute;min-width:85px;">
-//                        <div class="p1 label" style="padding:0;margin:0;display:inline-block;background-color:#0f0;width:0%;border-top-right-radius:0px;border-bottom-right-radius:0px;">&nbsp;</div>
-//                        <div class="p0 label" style="padding:0;margin:0;display:inline-block;background-color:#e00;width:100%;border-top-left-radius:0px;border-bottom-left-radius:0px;">&nbsp;</div>
-//                    &nbsp;</div>
-//        //
-        //$('#mp_show_employee').on("click",()=>{
-        //    window.setTimeout(()=>{
-        //        $('#lightbox_box').children("iframe").remove();
-        //        $('#lightbox_box').append('<div class="container" style="max-height:'+ $('#lightbox_box').height() +'px;overflow:auto;"><table width="98%" border="1" id="mp_table"></table</div>');
-        //        $('#mp_table').append('<thead><tr><th>Wache</th><th>Name</th><th>Ausbildung</th><th>Fahrzeug</th></tr></thead>');
-        //        var s="<tbody>";
-        //        
-        //        for (var x=0; x < mp_employee.length; x++) {
-        //            s += "<tr>";
-        //            s += "<td>" + mp_employee[x][0] + "</td>";
-        //            s += "<td>" + mp_employee[x][1] + "</td>";
-        //            s += "<td>" + mp_employee[x][2] + "</td>";
-        //            s += "<td>" + mp_employee[x][3] + "</td>";
-        //            s += "</tr>";
-        //console.log(mp_employee[x]);
-        //        }
-        //        s+="</tbody>";
-        //        $('#mp_table').append(s);
-        //        $('#mp_table').tablesorter();
-        //    },500);
-        //});
-    }, 1500);
-    
     $.get("https://bigmama-online.de/leitstellenspiel/mp_snippet_dialog.php")
         .done((d)=>{
             $('body').append(d);
@@ -424,10 +184,5 @@ $(function(){
         })
     ;
     
-    window.setTimeout(()=> {
-        mp_show_speed();
-        mp_show_hospital_info();
-
-    }, 1000);
 });
 
