@@ -11,7 +11,7 @@ Kleine Helferlein die im LSSM (noch) nicht enthalten sind werden hier aktiviert.
 * **Einsatz-Filter** die Einsatzliste kann nach Credits gefiltert werden
 
 ## Installation
-Zum einfachen Betrieb des Script empfiehlt sich der Einsatz von [TamperMonkey](https://www.tampermonkey.net/). Dort einfach ein neues Skript hinzufügen und den Inhalt von **mp_loader.js** reinsetzen.
+Zum einfachen Betrieb des Script empfiehlt sich der Einsatz von [TamperMonkey](https://www.tampermonkey.net/). Dort einfach ein neues Skript hinzufügen und den Inhalt von [mp_loader.js](../mp_loader.js) reinsetzen.
 
 
 ## Features im Aufbau
