@@ -9,6 +9,7 @@ Kleine Helferlein die im LSSM (noch) nicht enthalten sind werden hier aktiviert.
 * **Krankenhaus-Info** im Fenster Sprechwunsch bearbeiten, werden mehr Infos zum Krankenhaus per Moveover angezeigt (Inhaber und Stufe) - beim Klick auf Info öffnet sich das Krankenhaus im neuen Tab/Fenster
 * **Personal-Übersicht** alles Personal kann in einer Liste sehen (unter Menü Profil->Angestellte) - mit Ausbildung und Fahrzeug-Bindung
 * **Einsatz-Filter** die Einsatzliste kann nach Credits gefiltert werden
+* **Info und Config Dialog** ist jetzt unter Profil ganz unten zu erreichen - wird bei Verions-Update einmalig pro Browser eingeblendet
 
 ## Installation
 Zum einfachen Betrieb des Script empfiehlt sich der Einsatz von [TamperMonkey](https://www.tampermonkey.net/). Dort einfach ein neues Skript hinzufügen und den Inhalt von [mp_loader.js](../mp_loader.js) reinsetzen.
@@ -16,6 +17,7 @@ Zum einfachen Betrieb des Script empfiehlt sich der Einsatz von [TamperMonkey](h
 
 ## Features im Aufbau
 Folgende Feature werden aktuell noch aufgebaut:
+* **Globaler Cache** Personal-Daten und andere gespeicherte Daten in die Cloud speichern, damit die nicht in jedem Browser erneut geladen werden müssen ??? **Datenschutz prüfen**
 
 ## Kontakt
 Wenn Fehler auftreten, oder Änderungswünsche bestehen, bitte gerne einen Issue Request eröffnen
