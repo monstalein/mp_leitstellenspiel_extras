@@ -25,4 +25,4 @@ Dies sind freie Skripte zur Erweiterung des Browser-Spiels leitstellenspiel - es
 
 > WARNUNG: Der Rechte-Inhaber des Spiels untersagt ausdrücklich den Einsatz von automatisierten Skripten (hier das Anheuern) und droht mit sofortiger Kündigung des Spieler-Accounts!
 
-Die Skripte loggen beim Aufruf lediglich die Spieler-ID mit - sonst werden keinerlei Daten erhoben.
+Die Skripte loggen beim Aufruf lediglich die Spieler-ID und die aktiven Skripte (also welche Module geladen werden) mit - sonst werden keinerlei Daten erhoben.
