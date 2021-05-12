@@ -14,6 +14,7 @@ Die Features sind schon verfügbar:
 * **Personal-Übersicht** alles Personal kann in einer Liste sehen (unter Menü Profil->Angestellte) - mit Ausbildung und Fahrzeug-Bindung
 * **Einsatz-Filter** die Einsatzliste kann nach Credits gefiltert werden
 * **Info und Config Dialog** ist jetzt unter Profil ganz unten zu erreichen - wird bei Verions-Update einmalig pro Browser eingeblendet
+* **Chat history highlighting** im Chatverlauf werden eigene Nachrichten oder mit Nennung des Spielernamens hervorgehoben
 
 ## Installation
 Zum einfachen Betrieb des Script empfiehlt sich der Einsatz von [TamperMonkey](https://www.tampermonkey.net/). Dort einfach ein neues Skript hinzufügen und den Inhalt von [mp_loader.js](../mp_loader.js) reinsetzen.
