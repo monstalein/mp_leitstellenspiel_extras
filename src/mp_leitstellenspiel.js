@@ -164,7 +164,6 @@ $(function(){
             sessionStorage.setItem("mp_username", username);
         }
         
-        mp_aliance_chat_highlight();
         
     }, 100);
     
