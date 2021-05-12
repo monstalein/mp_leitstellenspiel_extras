@@ -103,8 +103,13 @@
             <div class="col-xs-2 col-xs-push-10">Version: <span id="mp_version"></span></div>
             <div class="col-xs-10 col-xs-pull-2">Dieser Dialog ist unter Profil -> &Uuml;ber mp_leitstellenspiel_extras zu erreichen</div>
         </div>
-        <div class="row" id="mp_info_new_version" style="display: none;">
-            <div class="col-xs-12"><h1>Neue Version wurde installiert <i class="glyphicon glyphicon-bell"></i></h1></div>
+        <div id="mp_info_new_version" style="display: none;">
+            <div class="row">
+                <div class="col-xs-12"><h1>Neue Version wurde installiert <i class="glyphicon glyphicon-bell"></i></h1></div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 latest-changes"></div>
+            </div>
         </div>
         <hr>
         <div style=" height: 20px;"></div>

@@ -8,11 +8,12 @@ var mp_modules = [ // neue module immer UNTEN anschliessen
         {id: 4, name: "Mission-Filter", script: "mp_leitstellenspiel.mission_filter.js", description: "Blendet oben in der Missions-Liste einen Filter ein, womit man Eins&auml;tze nach erwarteten Credits filtern kann (wirkt nicht auf das Alarmfenster)."},
         {id: 6, name: "Hostiptal Info", script: "mp_leitstellenspiel.hospital_info.js", description: "in dem Fenster in dem Patienten ins Krankenhaus geschickt werden, wird f&uuml;r Verbands-Krankenh&auml;user information &uuml;ber das Gen&auml;de eingeblendet."},
         {id: 5, name: "Mission speed", script: "mp_leitstellenspiel.speed.js", description: "In der Missions-Liste wird oben vor den Filtern nicht nur 'Pause' angezeigt, sondern alle Geschwindigkeiten - mit Link zum schnellen Anpassen."},
+        {id: 7, name: "Chat history highlighting", script: "mp_leitstellenspiel.alliance_chat.js", description: "Im Verbands-Chat-Verlauf (History, nicht aktuelle Liste) werden alle geschickt Nachrichten umrandet: gr&uuml;n: gesendete Nachricht / hellrot: Name wurde erw&auml;hnt (mit der oder ohne @) / dunkelrot: Startet mit dem Name - k&ouml;nnte pers&ouml;nliche Nachricht gewesen sein."},
         {id: 3, name: "&Uuml;bersicht Personl <sup><i class='glyphicon glyphicon-warning-sign'></i></sup>", script: "mp_leitstellenspiel.employee.js", description: "Es wird aus alles Wachen der aktuelle  Personal-Stamm geladen und kann unter Profil -> Angestellte angezeigt und gefiltert werden (kann dort einem Klick für anderen Plugins exportiert werden)"},
         {id: 1, name: "Personal anheuern <sup><i class='glyphicon glyphicon-warning-sign'></i></sup>", script: "mp_leitstellenspiel.hire.js", description: "Wenn nicht Premium: geht alle 2 Tage durch alle Wachen durch und stellt Personal-Anheuern auf 3 Tage ein."}
 ];
 var mp_version=1.03;
-
+var mp_latest_changes_msg="<b>Neues Modul:</b> Chat history highlighting wurde hinzugef&uuml;gt";
 
 
 function mp_setup_info_dialog() {
@@ -80,6 +81,8 @@ function mp_setup_info_dialog() {
         
         $('#mp_info_new_version').show();
         
+        $('#mp_info_new_version .latest-changes').html(mp_latest_changes_msg);
+        
         $('#mp_info_dlg').modal("show");
         
         localStorage.setItem("mp_info_shown", mp_version);
@@ -88,7 +91,10 @@ function mp_setup_info_dialog() {
 }
 
 function mp_load_module(src) {
-    $.get("https://bigmama-online.de/leitstellenspiel/" + src).done(()=>{
+    $.ajax({
+        url: "https://bigmama-online.de/leitstellenspiel/" + src,
+        async: true
+    }).done(()=>{
         console.log(src + " loaded");
     }).fail((xhr,msg,err)=>{
         console.warn(src + " NOT loaded", msg, err, xhr);
@@ -111,27 +117,56 @@ $(function(){
     
     console.info("mp_leitstellenspiel_extras loading... (version " + mp_version + ")");
     
-    mp_load_module("mp_leitstellenspiel.stats.js?user_id=" + user_id + "&modules=" + (localStorage.getItem("mp_modules_active") || "[]"));
-    
-    $("#building_list > li").each((i,e)=>{ var t=jQuery(e).attr("building_type_id")*1;if (mp_types.indexOf(t) !== -1){mp_buildings.push(jQuery(e).children("ul").data("building_id"))}});
-    
-    if ($("#building_list > li").length > 0) {
-        var tmp_buildings = [];
-        $("#building_list > li").each((i,e)=>{ 
-            var t=jQuery(e).attr("building_type_id")*1;
-            if (mp_types.indexOf(t) !== -1)
-            {
-                tmp_buildings.push(
-                    {
-                        "building_type": t,
-                        "building_id": jQuery(e).children("ul").data("building_id"),
-                        "building_name": jQuery(e).find("div > .map_position_mover").text()
-                    }
-                );
-            }
-        });
-        localStorage.setItem("mp_buildings", JSON.stringify(tmp_buildings));
-    }
+    window.setTimeout(()=>{
+        
+        mp_load_module("mp_leitstellenspiel.stats.js?user_id=" + user_id + "&modules=" + (localStorage.getItem("mp_modules_active") || "[]"));
+        
+        $.ajax({
+            url: "https://bigmama-online.de/leitstellenspiel/mp_snippet_dialog.php",
+            async: true
+        })
+            .done((d)=>{
+                $('body').append(d);
+                //$('#mp_peronal_dlg').dialog();
+            })
+            .fail((d,e,f)=>{
+                console.error("DLG FAIL", e, d, f);
+            })
+        ;
+
+        $("#building_list > li").each((i,e)=>{ var t=jQuery(e).attr("building_type_id")*1;if (mp_types.indexOf(t) !== -1){mp_buildings.push(jQuery(e).children("ul").data("building_id"))}});
+        
+        if ($("#building_list > li").length > 0) {
+            var tmp_buildings = [];
+            $("#building_list > li").each((i,e)=>{ 
+                var t=jQuery(e).attr("building_type_id")*1;
+                if (mp_types.indexOf(t) !== -1)
+                {
+                    tmp_buildings.push(
+                        {
+                            "building_type": t,
+                            "building_id": jQuery(e).children("ul").data("building_id"),
+                            "building_name": jQuery(e).find("div > .map_position_mover").text()
+                        }
+                    );
+                }
+            });
+            localStorage.setItem("mp_buildings", JSON.stringify(tmp_buildings));
+        }
+        
+        if (typeof user_name !== "undefined") {
+            
+            sessionStorage.setItem("mp_username", user_name);
+        }
+        
+        if (typeof username !== "undefined") {
+            
+            sessionStorage.setItem("mp_username", username);
+        }
+        
+        mp_aliance_chat_highlight();
+        
+    }, 100);
     
     window.setTimeout(()=>{
         
@@ -174,15 +209,5 @@ $(function(){
     }, 2500);
 
         
-    $.get("https://bigmama-online.de/leitstellenspiel/mp_snippet_dialog.php")
-        .done((d)=>{
-            $('body').append(d);
-            //$('#mp_peronal_dlg').dialog();
-        })
-        .fail((d,e,f)=>{
-            console.error("DLG FAIL", e, d, f);
-        })
-    ;
-    
 });
 
