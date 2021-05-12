@@ -43,6 +43,8 @@
     var filter = () => {
         
         var h = 0, s = 0;
+        
+        $('#missions-panel-body .mission_deleted').remove();
       
         $('#missions-panel-body .missionSideBarEntry').each((i,e)=> {
 
