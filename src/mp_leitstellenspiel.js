@@ -12,7 +12,7 @@ var mp_modules = [ // neue module immer UNTEN anschliessen
         {id: 3, name: "&Uuml;bersicht Personl <sup><i class='glyphicon glyphicon-warning-sign'></i></sup>", script: "mp_leitstellenspiel.employee.js", description: "Es wird aus alles Wachen der aktuelle  Personal-Stamm geladen und kann unter Profil -> Angestellte angezeigt und gefiltert werden (kann dort einem Klick für anderen Plugins exportiert werden)"},
         {id: 1, name: "Personal anheuern <sup><i class='glyphicon glyphicon-warning-sign'></i></sup>", script: "mp_leitstellenspiel.hire.js", description: "Wenn nicht Premium: geht alle 2 Tage durch alle Wachen durch und stellt Personal-Anheuern auf 3 Tage ein."}
 ];
-var mp_version=1.03;
+var mp_version=1.04;
 var mp_latest_changes_msg="<b>Neues Modul:</b> Chat history highlighting wurde hinzugef&uuml;gt";
 
 
