@@ -15,6 +15,7 @@ Die Features sind schon verfügbar:
 * **Einsatz-Filter** die Einsatzliste kann nach Credits gefiltert werden
 * **Info und Config Dialog** ist jetzt unter Profil ganz unten zu erreichen - wird bei Verions-Update einmalig pro Browser eingeblendet
 * **Chat history highlighting** im Chatverlauf werden eigene Nachrichten oder mit Nennung des Spielernamens hervorgehoben
+* **Gebäude zuklappen** es können in der Gebäude-Liste die Gebäude einzeln zu- und aufgeklappt werden - für alle ist noch in Arbeit
 
 ## Installation
 Zum einfachen Betrieb des Script empfiehlt sich der Einsatz von [TamperMonkey](https://www.tampermonkey.net/). Dort einfach ein neues Skript hinzufügen und den Inhalt von [mp_loader.js](../mp_loader.js) reinsetzen.
@@ -22,7 +23,7 @@ Zum einfachen Betrieb des Script empfiehlt sich der Einsatz von [TamperMonkey](h
 
 ## Features im Aufbau
 Folgende Feature werden aktuell noch aufgebaut:
-*
+* **Gebäude zuklappen** toggle für alle - Problem sind noch nicht geladene Fahrzeuge
 
 ## Feature Ideen
 * **Globaler Cache** Personal-Daten und andere gespeicherte Daten in die Cloud speichern, damit die nicht in jedem Browser erneut geladen werden müssen ??? **Datenschutz prüfen**
