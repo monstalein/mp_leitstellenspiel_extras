@@ -1,14 +1,43 @@
 
 (($, mp_intervall, localStorage)=>{
+        
+    var m = JSON.parse(localStorage.getItem("aMissions"));
+    
+    if (m == null) {
+        
+        //missions - script vom LSSM
+        if(!localStorage.aMissions || JSON.parse(localStorage.aMissions).lastUpdate < (new Date().getTime() - 5 * 1000 * 60)) {
+            $.getJSON('/einsaetze.json').done((data) => {
+                localStorage.setItem('aMissions', JSON.stringify({lastUpdate: new Date().getTime(), value: data}));
+                m = JSON.parse(localStorage.getItem("aMissions"));
+            }).fail((d,e,f)=>{
+                console.warn("FAIL", d, e, f);
+            });
+        }
+        
+	} else {
+        
+        mp_start_mission_filter(m);
+        
+    }
+    
+    
+    
+})($, mp_intervall, localStorage);
+
+function mp_start_mission_filter(m) {
     
     let mp_missions = [];
-    
-    $('#search_input_field_missions').after('<label for="mp_mission_filter">Mission filter:</label> <select id="mp_mission_filter"></select> <small id="mp_mission_hidden"></small>');
+
+    $('#search_input_field_missions').after(`
+       <label for="mp_mission_filter">Mission filter:</label> <select id="mp_mission_filter"></select> 
+       <!--label alt="Sonder-Eins&auml;tze wie Muttertag, Halloween, Fussbal, etc."><input type="checkbox" id="mp_mission_filter_events"> Nur Sonder-Eins&auml;tze</label --> 
+       <small id="mp_mission_hidden"></small>
+    `
+    );
     
     var o = "<option value=\"-1\">Alle</option>";
 
-    var m = JSON.parse(localStorage.getItem("aMissions"));
-    
     for (var i = 0; i < mp_intervall.length; i++) {
         
         o += `<option value="${i}">Ab ${mp_intervall[i].n} Credits</option>`;
@@ -52,6 +81,7 @@
             
             if (missions[id] < mp_mission_filter_selected) {
                 
+                //if ($('#mp_mission_filter_events').prop("checked") != false)
                 $(e).hide();
                 h++;
                 
@@ -76,4 +106,4 @@
         
     }, 1000);
 
-})($, mp_intervall, localStorage);
+}

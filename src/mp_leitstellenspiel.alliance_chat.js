@@ -1,14 +1,14 @@
 "use strict";
 
-(($, sessionStorage)=> {
+(($, localStorage)=> {
     
-    if (location.href.indexOf("alliance_chat")>=0 && sessionStorage.getItem("mp_username")) {
+    if (location.href.indexOf("alliance_chat")>=0 && localStorage.getItem("mp_username")) {
         
         window.setTimeout(()=>{
             
-            $('.well p:contains("' + sessionStorage.getItem("mp_username") + '")').each((i,e)=>{
+            $('.well p:contains("' + localStorage.getItem("mp_username") + '")').each((i,e)=>{
                 
-                if ($(e).text().indexOf(sessionStorage.getItem("mp_username")) === 0) { // starts with username - was maybe personal
+                if ($(e).text().indexOf(localStorage.getItem("mp_username")) === 0) { // starts with username - was maybe personal
                 
                     $(e).closest("div").css("outline", "4px solid #600");
                     
@@ -19,9 +19,9 @@
                 }
             });
             
-            $('.well a:contains("' + sessionStorage.getItem("mp_username") + '")').closest("div").css("outline", "4px solid #0d0");
+            $('.well a:contains("' + localStorage.getItem("mp_username") + '")').closest("div").css("outline", "4px solid #0d0");
             
         }, 100);
     }
 
-})($, sessionStorage);
+})($, localStorage);
