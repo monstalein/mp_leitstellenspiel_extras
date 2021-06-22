@@ -18,7 +18,7 @@ Die Features sind schon verfügbar:
 * `Gebäude zuklappen` es können in der Gebäude-Liste die Gebäude einzeln zu- und aufgeklappt werden - für alle ist noch in Arbeit
 
 ## Installation
-Zum einfachen Betrieb des Script empfiehlt sich der Einsatz von [TamperMonkey](https://www.tampermonkey.net/). Dort einfach ein neues Skript hinzufügen und den Inhalt von [mp_loader.js](../mp_loader.js) reinsetzen.
+Zum einfachen Betrieb des Script empfiehlt sich der Einsatz von [TamperMonkey](https://www.tampermonkey.net/). Dort einfach ein neues Skript hinzufügen und den Inhalt von [mp_loader.js](https://raw.githubusercontent.com/monstalein/mp_leitstellenspiel_extras/main/mp_loader.js) reinsetzen.
 
 
 ## Features im Aufbau
