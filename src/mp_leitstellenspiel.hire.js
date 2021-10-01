@@ -82,7 +82,7 @@ function mp_hire(i){
 
 function mp_hire_start() {
     
-    var d=new Date();
+    var d=new Date(),s=localStorage.getItem("mp_hire_started");
     console.info("mp_leitstellenspiel_extras starting (" + s + ")");
     console.group("mp_leitstellenspiel_extras running");
     d.setDate(d.getDate()+2); // add two days to wait
