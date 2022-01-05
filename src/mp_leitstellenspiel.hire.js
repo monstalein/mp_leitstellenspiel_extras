@@ -17,7 +17,8 @@ var mp_stopHiding = false;
         var d=new Date(),s=localStorage.getItem("mp_hire_started");
         if (s==null||d.getTime()>(s*1)) {
             
-            mp_hire_load();
+            //mp_hire_load();
+            mp_hire_start();
             
         }else{
             console.info("mp_leitstellenspiel_extras waiting a few days to start");
@@ -28,7 +29,8 @@ var mp_stopHiding = false;
                 $('#mp_employee').off().css("cursor", "wait");
                 $('#mp_employee > span > span').text('einstellen läuft ...');
                 mp_stopHiding=true;
-                mp_hire_load();
+                //mp_hire_load();
+                mp_hire_start();
                 return false;
             });
             window.setTimeout(()=>{
@@ -45,7 +47,8 @@ var mp_stopHiding = false;
                 $('#mp_employee').off().css("cursor", "wait");
                 $('#mp_employee > span > span').text('einstellen läuft ...');
                 mp_stopHiding=true;
-                mp_hire_load();
+                //mp_hire_load();
+                mp_hire_start();
                 return false;
             });
         window.setTimeout(()=>{
@@ -91,4 +94,4 @@ function mp_hire_start() {
     
 }
 
-mp_hire_start();
+//mp_hire_start();
