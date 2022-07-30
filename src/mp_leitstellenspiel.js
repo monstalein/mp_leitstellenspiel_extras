@@ -6,15 +6,34 @@ let mp_intervall = [{n:0, x:500},{n:500,x:1000},{n:1000,x:3000},{n:3000,x:6000},
 var mp_modules = [ // neue module immer UNTEN anschliessen
         {id: 2, name: "Bereitstellungsraum selector", script: "mp_leitstellenspiel.bereitstellung.js", description: "Im Bereitstellungsraum wird oben ein Liste an beteiligten Wachen angezeit, um alle Fahrzeug von dieser Wache auszuw&auml;hlen. Danach kann man alle diese Fahrzeuge nach Hause schicken."},
         {id: 4, name: "Mission-Filter", script: "mp_leitstellenspiel.mission_filter.js", description: "Blendet oben in der Missions-Liste einen Filter ein, womit man Eins&auml;tze nach erwarteten Credits filtern kann (wirkt nicht auf das Alarmfenster)."},
-        {id: 6, name: "Hostiptal Info", script: "mp_leitstellenspiel.hospital_info.js", description: "in dem Fenster in dem Patienten ins Krankenhaus geschickt werden, wird f&uuml;r Verbands-Krankenh&auml;user information &uuml;ber das Gen&auml;de eingeblendet."},
+        {
+            id: 6, 
+            name: "Hostiptal Info", 
+            pathname: "/vehicles",
+            script: "mp_leitstellenspiel.hospital_info.js", 
+            description: "in dem Fenster in dem Patienten ins Krankenhaus geschickt werden, wird f&uuml;r Verbands-Krankenh&auml;user information &uuml;ber das Gen&auml;de eingeblendet."
+        },
         {id: 5, name: "Mission speed", script: "mp_leitstellenspiel.speed.js", description: "In der Missions-Liste wird oben vor den Filtern nicht nur 'Pause' angezeigt, sondern alle Geschwindigkeiten - mit Link zum schnellen Anpassen."},
-        {id: 7, name: "Chat history highlighting", script: "mp_leitstellenspiel.alliance_chat.js", description: "Im Verbands-Chat-Verlauf (History, nicht aktuelle Liste) werden alle geschickt Nachrichten umrandet: gr&uuml;n: gesendete Nachricht / hellrot: Name wurde erw&auml;hnt (mit der oder ohne @) / dunkelrot: Startet mit dem Name - k&ouml;nnte pers&ouml;nliche Nachricht gewesen sein."},
+        {
+            id: 7, 
+            name: "Chat history highlighting", 
+            pathname: "/alliance_chats",
+            script: "mp_leitstellenspiel.alliance_chat.js", 
+            description: "Im Verbands-Chat-Verlauf (History, nicht aktuelle Liste) werden alle geschickt Nachrichten umrandet: gr&uuml;n: gesendete Nachricht / hellrot: Name wurde erw&auml;hnt (mit der oder ohne @) / dunkelrot: Startet mit dem Name - k&ouml;nnte pers&ouml;nliche Nachricht gewesen sein."
+        },
         {id: 8, name: "Geb&auml;ude zuklappen (beta)", script: "mp_leitstellenspiel.building_toggle.js", description: "Geb&auml;ude k&ouml;nnen zu- und aufgeklappt werden, damit die Liste etwas &uuml;bersichtlicher wird.<br>Noch manuell - automatisch ist in Entwicklung"},
+        {
+            id: 9, 
+            name: "M&ouml;gliche Eins&auml;tze: DGL ausblenden", 
+            pathname: "/einsaetze",
+            script: "mp_leitstellenspiel.hidedgl.js", 
+            description: "Auf der Seite &quot;M&ouml;gliche Eins&auml;tze&quot; alle Eins&auml;tze die Dienstgruppen-Erweiterung ben&ouml;tigen ausblenden."
+        },
         {id: 3, name: "&Uuml;bersicht Personal <sup><i class='glyphicon glyphicon-warning-sign'></i></sup>", script: "mp_leitstellenspiel.employee.js", description: "Es wird aus alles Wachen der aktuelle  Personal-Stamm geladen und kann unter Profil -> Angestellte angezeigt und gefiltert werden (kann dort einem Klick für anderen Plugins exportiert werden)"},
-        {id: 1, name: "Personal anheuern <sup><i class='glyphicon glyphicon-warning-sign'></i></sup>", script: "mp_leitstellenspiel.hire.js", description: "Wenn nicht Premium: geht alle 2 Tage durch alle Wachen durch und stellt Personal-Anheuern auf 3 Tage ein."}
+        {id: 1, name: "Personal anheuern <sup><i class='glyphicon glyphicon-warning-sign'></i></sup>", script: "mp_leitstellenspiel.hire.js", description: "Wenn nicht Premium: geht alle 2 Tage durch alle Wachen durch und stellt Personal-Anheuern auf 3 Tage ein."},
 ];
-var mp_version=1.05;
-var mp_latest_changes_msg="<b>Neues Modul:</b> Geb&auml;ude zuklappen - noch manuell";
+var mp_version=1.06;
+var mp_latest_changes_msg="<b>Neues Modul:</b> M&ouml;gliche Eins&auml;tze: DGL ausblenden";
 
 
 function mp_setup_info_dialog() {
@@ -176,14 +195,41 @@ $(function(){
 
         for (var i = 0; i < mods.length; i++) {
             
+            // load module by id
             var mod = mp_modules.filter(function (e) {return e.id == this.i}, {i: mods[i]});
 
             if (mod.length >= 1) {
                 
-                // modul laden
-                mp_load_module(mod[0].script);
+                // if pathname for module is set
+                if (mod[0].pathname)
+                {
+                    console.log("location", location);
+                    if (location.pathname.startsWith(mod[0].pathname))
+                    {
+                        // modul laden
+                        mp_load_module(mod[0].script);
+                    }
+                }
+                else
+                {
+                    // modul laden
+                    mp_load_module(mod[0].script);
+                }
             }
             
+        }
+        
+        //https://www.leitstellenspiel.de/api/vehicles/34428298
+        
+        var chunks = location.pathname.substr(1).split("/");
+        
+        if (chunks.length == 3 && chunks[2] == "zuweisung") {
+            $.getJSON("https://www.leitstellenspiel.de/api/vehicles/" + chunks[1])
+                .done(function(d) {
+                    console.info(d);
+                })
+                .fail(function(a,b,c){console.warn(b,c,a);})
+            ;
         }
         
         //if ($('#mission_general_info').length > 0) {
