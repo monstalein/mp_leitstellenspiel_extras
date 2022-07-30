@@ -10,6 +10,7 @@ var mp_modules = [ // neue module immer UNTEN anschliessen
             id: 6, 
             name: "Hostiptal Info", 
             pathname: "/vehicles",
+            pathStartsWith: true,
             script: "mp_leitstellenspiel.hospital_info.js", 
             description: "in dem Fenster in dem Patienten ins Krankenhaus geschickt werden, wird f&uuml;r Verbands-Krankenh&auml;user information &uuml;ber das Gen&auml;de eingeblendet."
         },
@@ -18,6 +19,7 @@ var mp_modules = [ // neue module immer UNTEN anschliessen
             id: 7, 
             name: "Chat history highlighting", 
             pathname: "/alliance_chats",
+            pathStartsWith: true,
             script: "mp_leitstellenspiel.alliance_chat.js", 
             description: "Im Verbands-Chat-Verlauf (History, nicht aktuelle Liste) werden alle geschickt Nachrichten umrandet: gr&uuml;n: gesendete Nachricht / hellrot: Name wurde erw&auml;hnt (mit der oder ohne @) / dunkelrot: Startet mit dem Name - k&ouml;nnte pers&ouml;nliche Nachricht gewesen sein."
         },
@@ -26,6 +28,7 @@ var mp_modules = [ // neue module immer UNTEN anschliessen
             id: 9, 
             name: "M&ouml;gliche Eins&auml;tze: DGL ausblenden", 
             pathname: "/einsaetze",
+            pathStartsWith: false,
             script: "mp_leitstellenspiel.hidedgl.js", 
             description: "Auf der Seite &quot;M&ouml;gliche Eins&auml;tze&quot; alle Eins&auml;tze die Dienstgruppen-Erweiterung ben&ouml;tigen ausblenden."
         },
@@ -204,7 +207,12 @@ $(function(){
                 if (mod[0].pathname)
                 {
                     console.log("location", location);
-                    if (location.pathname.startsWith(mod[0].pathname))
+                    if (mod[0].pathStartsWith && location.pathname.startsWith(mod[0].pathname))
+                    {
+                        // modul laden
+                        mp_load_module(mod[0].script);
+                    }
+                    else if(location.pathname == mod[0].pathname)
                     {
                         // modul laden
                         mp_load_module(mod[0].script);
