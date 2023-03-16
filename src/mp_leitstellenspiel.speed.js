@@ -1,6 +1,6 @@
 "use strict";
 
-var mp_speed=["Realistisch", "Normal", "Schnell", "Turbo", "Langsam", "Extrem langsam", "Pause"];
+var mp_speed=["Realistisch", "Normal", "Schnell", "Turbo", "Langsam", "Extrem langsam", "Pause", "Semi-Realistisch", "Langsamer"];
 
 (()=>{
 
